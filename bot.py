@@ -1,6 +1,8 @@
 import asyncio
 import nextcord as discord
 from nextcord.ext import commands, tasks
+from random import randint
+from arrow import utcnow
 
 import constantes
 from checkFMEL import availability
@@ -10,11 +12,24 @@ async def dmChannelUser(user):
         await user.create_dm()
     return user.dm_channel
 
+updateRate = [100]
+
 def main():
     token = constantes.token
 
     intents = discord.Intents.all()
     bot = commands.Bot(command_prefix=";", help_command=None, intents = intents)
+
+    @tasks.loop(minutes = 1.0)
+    async def checkAvailability():
+        if randint(1, round(updateRate[0])) == 1:
+            if availability(constantes.userFMEL, constantes.mdpFMEL):
+                await (await dmChannelUser(await bot.fetch_user(constantes.clientId))).send("REGARDE LE SITE DE LA FMEL, IL Y A UN TRUC !!!!")
+
+    @bot.command(name="update_rate")
+    async def update_rate(ctx, newRate: int):
+        if ctx.author.id == constantes.clientId:
+            updateRate[0] = newRate
 
     @bot.event
     async def on_message(message):
