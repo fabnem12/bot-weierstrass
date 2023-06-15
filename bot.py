@@ -3,6 +3,7 @@ import nextcord as discord
 from nextcord.ext import commands, tasks
 
 import constantes
+from checkFMEL import availability
 
 async def dmChannelUser(user):
     if user.dm_channel is None:
@@ -18,6 +19,12 @@ def main():
     @bot.event
     async def on_message(message):
         await bot.process_commands(message)
+
+    @bot.command(name="availability")
+    async def check_availability(ctx):
+        await ctx.message.add_reaction("👀")
+        ret = availability(constantes.userFMEL, constantes.mdpFMEL)
+        await ctx.send("Disponibilité de logement FMEL : " + str(ret))
 
     @bot.command(name="hello")
     async def hello(ctx, otherUser: discord.Member):
